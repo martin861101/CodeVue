@@ -55,7 +55,7 @@ graph TD
 
 ### Setup
 ```bash
-git clone https://github.com/yourusername/codevue.git
+git clone https://github.com/martin861101/codevue.git
 cd codevue
 python3 -m venv venv
 source venv/bin/activate
