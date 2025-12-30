@@ -11,7 +11,7 @@
 
 ## 🚀 Overview
 
-CodeVue is not just a wrapper for ChatGPT. It is a fully **Agentic System** that lives in your terminal. It combines local AI (Ollama) for speed and privacy with cloud AI (Gemini/OpenRouter) for complex reasoning.
+CodeVue is a fully **Agentic System** that lives in your terminal. It combines local AI (Ollama) for speed and privacy with cloud AI (Gemini/OpenRouter) for complex reasoning.
 
 **Key Capabilities:**
 * **🧠 RAG Memory:** Remembers past conversations and code context (using ChromaDB & SQLite).
