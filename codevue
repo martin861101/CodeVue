@@ -44,7 +44,7 @@ class NeuroTermApp(App):
         self.log_widget = self.query_one(RichLog)
         self.input = self.query_one(Input)
         self.status_label = self.query_one("#status")
-        self.log_widget.write(Markdown("# 🖥️ NEUROTERM v3.0 - Agentic System Online"))
+        self.log_widget.write(Markdown("# 🖥️  CodeVue-3.0 - Agentic System Online"))
 
     def start_thinking(self):
         self.status_label.add_class("thinking")

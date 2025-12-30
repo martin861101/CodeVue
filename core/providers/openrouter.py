@@ -4,7 +4,7 @@ from .base import LLMProvider
 class OpenRouterProvider(LLMProvider):
     name = "openrouter"
     
-    def __init__(self, api_key: str, model: str = "meta-llama/llama-3.1-8b-instruct"):
+    def __init__(self, api_key: str, model: str = "xiaomi/mimo-v2-flash:free"):
         self.client = AsyncOpenAI(
             api_key=api_key,
             base_url="https://openrouter.ai/api/v1"
@@ -32,8 +32,5 @@ class OpenRouterProvider(LLMProvider):
     
     def models(self):
         return [
-            "meta-llama/llama-3.1-8b-instruct",
-            "meta-llama/llama-3.1-70b-instruct",
-            "anthropic/claude-3.5-sonnet",
-            "openai/gpt-4-turbo"
+	    "xiaomi/mimo-v2-flash:free"
         ]

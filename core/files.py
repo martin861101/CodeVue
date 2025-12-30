@@ -1,115 +1,85 @@
-from pathlib import Path
 import os
 import subprocess
+import sys
+from pathlib import Path
 
 class FileManager:
-    def __init__(self, root: Path = None):
-        self.root = root or Path.cwd()
+    def __init__(self, root_dir="."):
+        self.root = Path(root_dir)
         self.write_allowed = False
         self.active_file = None
-    
-    def resolve_path(self, path: str) -> Path:
-        """Resolve and validate path within project root"""
-        resolved = (self.root / path).resolve()
-        if not str(resolved).startswith(str(self.root)):
-            raise PermissionError(f"Access denied: {path} is outside project root")
-        return resolved
-    
-    def scan_directory(self, path: str = ".") -> list:
-        """List files in directory"""
-        dir_path = self.resolve_path(path)
-        if not dir_path.is_dir():
-            raise NotADirectoryError(f"{path} is not a directory")
-        
-        files = []
-        for item in sorted(dir_path.iterdir()):
-            if item.name.startswith('.'):
-                continue
-            files.append({
-                'name': item.name,
-                'type': 'dir' if item.is_dir() else 'file',
-                'path': str(item.relative_to(self.root))
-            })
-        return files
-    
-    def read_file(self, path: str) -> str:
-        """Read file contents"""
-        file_path = self.resolve_path(path)
-        if not file_path.exists():
-            raise FileNotFoundError(f"File not found: {path}")
-        
+
+    def read_file(self, path):
         try:
-            return file_path.read_text(encoding='utf-8')
-        except UnicodeDecodeError:
-            return f"[Binary file: {path}]"
-    
-    def write_file(self, path: str, content: str):
-        """Write file contents (requires permission)"""
+            with open(path, "r", encoding="utf-8") as f:
+                return f.read()
+        except Exception as e:
+            return f"Error reading file: {str(e)}"
+
+    def write_file(self, path, content):
         if not self.write_allowed:
             raise PermissionError("Write permission denied. Use /allow write")
-        
-        file_path = self.resolve_path(path)
-        file_path.parent.mkdir(parents=True, exist_ok=True)
-        file_path.write_text(content, encoding='utf-8')
-        return file_path
-    
-    def execute_python(self, path: str) -> str:
-        """Execute Python file and return output"""
-        file_path = self.resolve_path(path)
-        if not file_path.exists():
-            raise FileNotFoundError(f"File not found: {path}")
-        
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(content)
+        return True
+
+    def execute_script(self, file_path):
         try:
             result = subprocess.run(
-                ['python', str(file_path)],
+                [sys.executable, file_path],
                 capture_output=True,
                 text=True,
-                timeout=30,
-                cwd=self.root
+                timeout=15
             )
-            output = result.stdout
-            if result.stderr:
-                output += f"\n[stderr]\n{result.stderr}"
-            return output
+            return {
+                "success": result.returncode == 0,
+                "output": result.stdout,
+                "error": result.stderr,
+                "exit_code": result.returncode
+            }
         except subprocess.TimeoutExpired:
-            return "❌ Execution timeout (30s)"
+            return {
+                "success": False, 
+                "output": "", 
+                "error": "❌ Execution timed out (killed after 15s).",
+                "exit_code": -1
+            }
         except Exception as e:
-            return f"❌ Execution error: {str(e)}"
+            return {
+                "success": False, 
+                "output": "", 
+                "error": f"❌ Execution failed: {str(e)}",
+                "exit_code": -1
+            }
+
+    def scan_directory(self, path="."):
+        path = Path(path)
+        if not path.exists(): return []
+        return [{"path": str(p), "type": "dir" if p.is_dir() else "file"} for p in path.iterdir()]
+        
+    def tree(self, path=".", level=0):
+        # Simple tree implementation
+        path = Path(path)
+        tree_str = ""
+        if level == 0:
+            tree_str += f"{path.name}/\n"
+        
+        try:
+            for entry in sorted(path.iterdir()):
+                prefix = "  " * (level + 1)
+                if entry.is_dir():
+                    tree_str += f"{prefix}📁 {entry.name}/\n"
+                    if level < 2: # Limit depth
+                         tree_str += self.tree(entry, level + 1)
+                else:
+                    tree_str += f"{prefix}📄 {entry.name}\n"
+        except PermissionError:
+            pass
+        return tree_str
     
-    def create_project(self, name: str):
-        """Create new project structure"""
-        project_path = self.root / name
-        project_path.mkdir(parents=True, exist_ok=True)
-        
-        # Create basic structure
-        (project_path / "README.md").write_text(f"# {name}\n\nCreated by Neuroterm")
-        (project_path / "src").mkdir(exist_ok=True)
-        (project_path / "tests").mkdir(exist_ok=True)
-        
-        return project_path
-    
-    def tree(self, path: str = ".", max_depth: int = 3) -> str:
-        """Generate directory tree"""
-        def _tree(dir_path: Path, prefix: str = "", depth: int = 0):
-            if depth >= max_depth:
-                return ""
-            
-            lines = []
-            try:
-                items = sorted([p for p in dir_path.iterdir() if not p.name.startswith('.')])
-            except PermissionError:
-                return ""
-            
-            for i, item in enumerate(items):
-                is_last = i == len(items) - 1
-                current = "└── " if is_last else "├── "
-                lines.append(f"{prefix}{current}{item.name}")
-                
-                if item.is_dir():
-                    extension = "    " if is_last else "│   "
-                    lines.append(_tree(item, prefix + extension, depth + 1))
-            
-            return "\n".join(filter(None, lines))
-        
-        start_path = self.resolve_path(path)
-        return f"{start_path.name}/\n" + _tree(start_path)
+    def create_project(self, name):
+        p = Path(name)
+        p.mkdir(exist_ok=True)
+        (p / "main.py").touch()
+        (p / "README.md").write_text(f"# {name}")
+        return str(p)
