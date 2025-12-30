@@ -103,12 +103,7 @@ python3 app.py
 - **Missing Logs**: Create `system.log` manually.
 
 ---
-**Global Setup**
----
-copy project directory to /usr/local/bin/codevue_files
-`codevue
-```
-- Run from any DIR using **"codevue"**
+
 
 ## 📂 Folder Structure
 ---
