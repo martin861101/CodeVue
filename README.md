@@ -1,6 +1,6 @@
 # 👁️ CodeVue (NeuroTerm v3.0)
 
-> **The Cyberpunk AI Code Companion.**
+> **AI Code Companion (RAG,LangGraph)**
 > A terminal-based, agentic AI coding environment that remembers your projects, routes tasks intelligently, and autonomously fixes bugs.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
