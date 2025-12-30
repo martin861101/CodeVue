@@ -27,15 +27,15 @@ CodeVue is not just a wrapper for ChatGPT. It is a fully **Agentic System** that
 ```mermaid
 graph TD
     User[User Input] --> Agent[NeuroAgent Executor]
-    Agent --> Memory[RAG Memory (ChromaDB)]
-    Agent --> Router[NeuroGraph Router (Ollama/Llama 3.2)]
-    Router -- Simple Task --> Local[Local LLM (Ollama)]
-    Router -- Complex Task --> Cloud[Cloud API (Gemini/OpenRouter)]
-    Local --> Response
+    Agent --> Memory[RAG Memory - ChromaDB]
+    Agent --> Router[NeuroGraph Router - Ollama/Llama 3.2]
+    Router -->|Simple Task| Local[Local LLM - Ollama]
+    Router -->|Complex Task| Cloud[Cloud API - Gemini/OpenRouter]
+    Local --> Response[Response]
     Cloud --> Response
     Response --> UI[Textual TUI]
     Response --> Files[File System]
-    Files --> Backup[Auto-Backup (SQLite)]
+    Files --> Backup[Auto-Backup - SQLite]
 ```
 
 ### 🤖 Core Stack
